@@ -3,9 +3,12 @@ import { useEffect, useState } from "react";
 import Screen from "./app/components/Screen";
 import * as ImagePicker from "expo-image-picker";
 import { Alert, Button, Image } from "react-native";
+import ImageInputLists from "./app/components/ImageInputLists";
+import ListingScreen from "./app/screens/ListingScreen";
+import ListingEditScreen from "./app/screens/ListingEditScreen";
 
 export default function App() {
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState([]);
   const selectImage = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync();
@@ -15,10 +18,5 @@ export default function App() {
     }
   };
 
-  return (
-    <Screen>
-      <Button onPress={selectImage} title="Select Image" />
-      <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />
-    </Screen>
-  );
+  return <ListingEditScreen />;
 }

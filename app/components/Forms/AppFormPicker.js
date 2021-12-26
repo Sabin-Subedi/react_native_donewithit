@@ -23,7 +23,7 @@ function AppFormPicker({
         numberOfColumns={numberOfColumns}
         {...props}
       ></AppPicker>
-      {<ErrorMessage error={errors[name]} />}
+      {errors[name] && <ErrorMessage error={errors[name]} />}
     </>
   );
 }
