@@ -1,20 +1,24 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StatusBar } from "expo-status-bar";
+import { useEffect, useState } from "react";
+import Screen from "./app/components/Screen";
+import * as ImagePicker from "expo-image-picker";
+import { Alert, Button, Image } from "react-native";
 
 export default function App() {
+  const [image, setImage] = useState(null);
+  const selectImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync();
+      result.uri && setImage(result.uri);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <Screen>
+      <Button onPress={selectImage} title="Select Image" />
+      <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
