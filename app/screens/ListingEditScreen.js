@@ -1,16 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet } from "react-native";
 import * as Yup from "yup";
 import CategoryPickerItem from "../components/CategoryPickerItem";
-import {
-  AppForm,
-  AppFormField,
-  AppFormPicker,
-  SubmitButton,
-} from "../components/Forms";
+import AppForm from "../components/Forms/AppForm";
+import AppFormField from "../components/Forms/AppFormField";
+import useLocation from "../hooks/useLocation";
+import listingApi from "../api/listings";
 import AppFormImagePicker from "../components/Forms/AppFormImagePicker";
+import AppFormPicker from "../components/Forms/AppFormPicker";
+import SubmitButton from "../components/Forms/SubmitButton";
 import Screen from "../components/Screen";
 import colors from "../config/colors";
+import UploadScreen from "./UploadScreen";
 
 const validationSchema = Yup.object().shape({
   title: Yup.string().required().min(1).label("Title"),
@@ -78,6 +79,27 @@ const categories = [
 ];
 
 function ListingEditScreen() {
+  const location = useLocation();
+  const [uploadVisible, setUploadVisible] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const handleSubmit = async (listing, { resetForm }) => {
+    setUploadProgress(0);
+    setUploadVisible(true);
+    const result = await listingApi.addListing(
+      { ...listing, location },
+      (progress) => setUploadProgress(progress)
+    );
+
+    if (!result.ok) {
+      setUploadVisible(false);
+
+      alert("Could not save the listing.");
+      return;
+    }
+    resetForm();
+  };
+
   return (
     <Screen style={styles.container}>
       <AppForm
@@ -89,7 +111,7 @@ function ListingEditScreen() {
           images: [],
         }}
         validationSchema={validationSchema}
-        onSubmit={(values) => console.log(values)}
+        onSubmit={handleSubmit}
       >
         <AppFormImagePicker name="images" />
         <AppFormField maxLength={255} name="title" placeholder="Title" />
@@ -117,6 +139,11 @@ function ListingEditScreen() {
         />
         <SubmitButton title="Post" color={colors.danger} />
       </AppForm>
+      <UploadScreen
+        onDone={() => setUploadVisible(false)}
+        progress={uploadProgress}
+        visible={uploadVisible}
+      />
     </Screen>
   );
 }

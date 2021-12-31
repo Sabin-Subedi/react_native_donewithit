@@ -41,7 +41,6 @@ function ImageInput({ imageUri, onChangeImage }) {
 
   handlePress = () => {
     if (!imageUri) {
-      console.log("pressed");
       selectImage();
     } else {
       Alert.alert("Delete", "Are you sure you want to delete this image?", [

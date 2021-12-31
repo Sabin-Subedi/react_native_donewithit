@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import * as Location from "expo-location";
 
 export default function useLocation() {
@@ -6,7 +6,7 @@ export default function useLocation() {
 
   const getLocation = async () => {
     try {
-      const { granted } = await Location.getCurrentPositionAsync({});
+      const { granted } = await Location.getBackgroundPermissionsAsync({});
       if (!granted) return;
       const {
         coords: { latitude, longitude },
@@ -18,9 +18,11 @@ export default function useLocation() {
     }
   };
 
+  console.log(location);
+
   useEffect(() => {
     getLocation();
   }, []);
 
-  return location;
+  return { latitude: 0, longitude: 0 };
 }

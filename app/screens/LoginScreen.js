@@ -1,16 +1,14 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import { Image, StyleSheet } from "react-native";
-
 import Screen from "../components/Screen";
 import colors from "../config/colors";
-import { Formik } from "formik";
+import authApi from "../api/auth";
 import * as yup from "yup";
-import {
-  ErrorMessage,
-  AppForm,
-  AppFormField,
-  SubmitButton,
-} from "../components/Forms";
+import AppForm from "../components/Forms/AppForm";
+import AppFormField from "../components/Forms/AppFormField";
+import SubmitButton from "../components/Forms/SubmitButton";
+import useAuth from "../hooks/useAuth";
+import ErrorMessage from "../components/Forms/ErrorMessage";
 
 const validationSchema = yup.object().shape({
   email: yup.string().required().email().label("Email"),
@@ -18,14 +16,28 @@ const validationSchema = yup.object().shape({
 });
 
 function LoginScreen() {
+  const [loginFailed, setLoginFailed] = useState(false);
+  const { handleLogin } = useAuth();
+
+  const handleSubmit = async (loginInfo) => {
+    const result = await authApi.login(loginInfo.email, loginInfo.password);
+    if (!result.ok) return setLoginFailed(true);
+    setLoginFailed(false);
+    handleLogin(result.data);
+  };
+
   return (
     <Screen style={styles.screen}>
       <Image source={require("../assets/logo-red.png")} style={styles.logo} />
       <AppForm
         initialValues={{ email: "", password: "" }}
-        onSubmit={(value) => console.log(value.email)}
+        onSubmit={handleSubmit}
         validationSchema={validationSchema}
       >
+        <ErrorMessage
+          error="Invisible email and/or password"
+          visible={loginFailed}
+        />
         <AppFormField
           placeholder="Email"
           icon="mail"

@@ -1,22 +1,40 @@
-import { StatusBar } from "expo-status-bar";
-import { useEffect, useState } from "react";
-import Screen from "./app/components/Screen";
-import * as ImagePicker from "expo-image-picker";
-import { Alert, Button, Image } from "react-native";
-import ImageInputLists from "./app/components/ImageInputLists";
-import ListingScreen from "./app/screens/ListingScreen";
-import ListingEditScreen from "./app/screens/ListingEditScreen";
+import React, { useEffect, useState } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import navigationTheme from "./app/navigation/navigationTheme";
+import AppNavigator from "./app/navigation/AppNavigator";
+import OfflineNotice from "./app/components/OfflineNotice";
+import AuthConxtext from "./app/auth/context";
+import AuthNavigator from "./app/navigation/AuthNavigator";
+import authStorage from "./app/auth/storage";
+import AppLoading from "expo-app-loading";
+import { navigationRef } from "./app/navigation/rootNavigation";
 
 export default function App() {
-  const [image, setImage] = useState([]);
-  const selectImage = async () => {
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync();
-      result.uri && setImage(result.uri);
-    } catch (e) {
-      console.log(e);
-    }
+  const [user, setUser] = useState();
+  const [isReady, setIsReady] = useState(false);
+
+  const restoreUser = async () => {
+    const user = await authStorage.getUser();
+    if (!user) return;
+    setUser(user);
   };
 
-  return <ListingEditScreen />;
+  if (!isReady)
+    return (
+      <AppLoading
+        startAsync={restoreUser}
+        onError={() => setIsReady(false)}
+        onFinish={() => setIsReady(true)}
+      />
+    );
+
+  return (
+    <AuthConxtext.Provider value={{ user, setUser }}>
+      <OfflineNotice />
+      <NavigationContainer ref={navigationRef} theme={navigationTheme}>
+        {/* <AuthNavigator /> */}
+        {user ? <AppNavigator /> : <AuthNavigator />}
+      </NavigationContainer>
+    </AuthConxtext.Provider>
+  );
 }
